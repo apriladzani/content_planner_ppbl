@@ -32,7 +32,8 @@ class DashboardScreen extends StatelessWidget {
                       Text('Total Content: $totalContent'),
                       Text('Total Asset: $totalAsset'),
                       Text('Total Workspace: ${appState.totalWorkspaces}'),
-                      Text('Total User: ${appState.totalUsers}'),
+
+
                     ],
                   ),
                 ),

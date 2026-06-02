@@ -3,12 +3,14 @@ class UserItem {
   final String name;
   final String email;
   final String role;
+  final String passwordHash;
 
   UserItem({
     required this.id,
     required this.name,
     required this.email,
     required this.role,
+    required this.passwordHash,
   });
 
   factory UserItem.fromMap(Map<String, dynamic> map) {
@@ -17,6 +19,7 @@ class UserItem {
       name: map['name'] as String,
       email: map['email'] as String,
       role: map['role'] as String,
+      passwordHash: (map['passwordHash'] as String?) ?? '',
     );
   }
 
@@ -26,6 +29,8 @@ class UserItem {
       'name': name,
       'email': email,
       'role': role,
+      'passwordHash': passwordHash,
     };
   }
 }
+

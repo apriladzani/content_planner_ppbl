@@ -12,20 +12,30 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _loading = false;
   String? _error;
 
   void _submit() async {
+    if (!formKey.currentState!.validate()) return;
+
     setState(() {
       _loading = true;
       _error = null;
     });
-    final success = await Provider.of<AppState>(context, listen: false)
-        .login(_emailController.text);
+
+    final success = await Provider.of<AppState>(context, listen: false).login(
+      _emailController.text,
+      _passwordController.text,
+    );
+
     setState(() {
       _loading = false;
     });
+
     if (success) {
       Navigator.pushReplacement(
         context,
@@ -33,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() {
-        _error = 'Login gagal. Email tidak ditemukan.';
+        _error = 'Login gagal. Email atau password salah.';
       });
     }
   }
@@ -47,13 +57,43 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+            Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      final v = value?.trim() ?? '';
+                      if (v.isEmpty) return 'Isi email';
+                      final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                      if (!isEmail.hasMatch(v)) return 'Email tidak valid';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      final v = value ?? '';
+                      if (v.trim().isEmpty) return 'Isi password';
+                      if (v.trim().length < 6) return 'Password minimal 6 karakter';
+                      return null;
+                    },
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             if (_error != null)
@@ -83,3 +123,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

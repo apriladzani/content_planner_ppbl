@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/asset_item.dart';
@@ -7,12 +10,21 @@ import '../models/workspace_item.dart';
 import '../services/db_service.dart';
 import '../services/pref_service.dart';
 
+
 class AppState extends ChangeNotifier {
   final Uuid _uuid = const Uuid();
 
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   bool isInitializing = true;
+
   bool isLogin = false;
   String role = 'user';
+
   String? userId;
   String? workspaceId;
   UserItem? currentUser;
@@ -45,14 +57,20 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String email) async {
+  Future<bool> login(String email, String password) async {
     await loadAll();
     final normalizedEmail = email.trim().toLowerCase();
+    final normalizedPassword = password;
+
     final matches = users
         .where((user) => user.email.trim().toLowerCase() == normalizedEmail)
         .toList();
     if (matches.isEmpty) return false;
+
     final user = matches.first;
+    final passwordHash = _hashPassword(normalizedPassword);
+    if (user.passwordHash != passwordHash) return false;
+
     userId = user.id;
     role = user.role;
     currentUser = user;
@@ -62,7 +80,7 @@ class AppState extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> register(String name, String email, String role) async {
+  Future<bool> register(String name, String email, String role, String password) async {
     final normalizedEmail = email.trim().toLowerCase();
     final exists = users.any(
       (user) => user.email.trim().toLowerCase() == normalizedEmail,
@@ -70,16 +88,19 @@ class AppState extends ChangeNotifier {
     if (exists) {
       return false;
     }
+
     final user = UserItem(
       id: _uuid.v4(),
       name: name.trim(),
       email: normalizedEmail,
       role: role,
+      passwordHash: _hashPassword(password),
     );
     await DBService.insertUser(user);
     await loadAll();
-    return await login(normalizedEmail);
+    return await login(normalizedEmail, password);
   }
+
 
   Future<void> logout() async {
     isLogin = false;
