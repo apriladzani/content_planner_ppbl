@@ -12,13 +12,16 @@ class ContentScreen extends StatelessWidget {
     final titleController = TextEditingController(text: item?.title ?? '');
     final descriptionController = TextEditingController(text: item?.description ?? '');
     final deadlineController = TextEditingController(text: item?.deadline ?? '');
+    final appState = Provider.of<AppState>(context, listen: false);
+    final categories = appState.categories;
+    String categoryId = item?.categoryId ?? (categories.isNotEmpty ? categories.first.id : '');
     String type = item?.type ?? 'video';
     String status = item?.status ?? 'draft';
     DateTime? selectedDeadline = item?.deadline.isNotEmpty == true
         ? DateTime.tryParse(item!.deadline)
         : null;
     final formKey = GlobalKey<FormState>();
-    final appState = Provider.of<AppState>(context, listen: false);
+    final hasCategories = categories.isNotEmpty;
 
     await showDialog<void>(
       context: context,
@@ -88,6 +91,34 @@ class ContentScreen extends StatelessWidget {
                     },
                     decoration: const InputDecoration(labelText: 'Status'),
                   ),
+                  const SizedBox(height: 12),
+                  if (!hasCategories)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Belum ada kategori. Tambahkan kategori terlebih dahulu melalui menu admin.',
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                    ),
+                  DropdownButtonFormField<String>(
+                    value: hasCategories ? (categoryId.isNotEmpty ? categoryId : categories.first.id) : null,
+                    items: categories
+                        .map((category) => DropdownMenuItem(
+                              value: category.id,
+                              child: Text(category.name),
+                            ))
+                        .toList(),
+                    onChanged: hasCategories
+                        ? (value) {
+                            if (value != null) categoryId = value;
+                          }
+                        : null,
+                    decoration: const InputDecoration(labelText: 'Kategori'),
+                    validator: (value) {
+                      if (!hasCategories) return null;
+                      return value == null || value.isEmpty ? 'Pilih kategori' : null;
+                    },
+                  ),
                 ],
               ),
             ),
@@ -95,23 +126,26 @@ class ContentScreen extends StatelessWidget {
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
             ElevatedButton(
-              onPressed: () async {
-                if (!formKey.currentState!.validate()) return;
-                final newContent = ContentItem(
-                  id: item?.id ?? const Uuid().v4(),
-                  title: titleController.text.trim(),
-                  type: type,
-                  status: status,
-                  description: descriptionController.text.trim(),
-                  deadline: deadlineController.text.trim(),
-                );
-                if (item == null) {
-                  await appState.createContent(newContent);
-                } else {
-                  await appState.updateContent(newContent);
-                }
-                Navigator.pop(context);
-              },
+              onPressed: hasCategories
+                  ? () async {
+                      if (!formKey.currentState!.validate()) return;
+                      final newContent = ContentItem(
+                        id: item?.id ?? const Uuid().v4(),
+                        title: titleController.text.trim(),
+                        type: type,
+                        status: status,
+                        description: descriptionController.text.trim(),
+                        deadline: deadlineController.text.trim(),
+                        categoryId: categoryId,
+                      );
+                      if (item == null) {
+                        await appState.createContent(newContent);
+                      } else {
+                        await appState.updateContent(newContent);
+                      }
+                      Navigator.pop(context);
+                    }
+                  : null,
               child: const Text('Simpan'),
             ),
           ],
@@ -123,32 +157,12 @@ class ContentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(builder: (context, appState, child) {
-      final hasWorkspace = appState.workspaceId != null;
       return Column(
         children: [
-          if (!hasWorkspace)
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.deepPurple),
-              ),
-              child: const Text(
-                'Anda harus membuat atau bergabung ke workspace terlebih dahulu sebelum membuat content planner.',
-                style: TextStyle(color: Colors.deepPurple),
-              ),
-            ),
           Expanded(
             child: appState.contents.isEmpty
-                ? Center(
-                    child: Text(
-                      hasWorkspace
-                          ? 'Belum ada content. Tambahkan content baru.'
-                          : 'Belum ada content. Buat atau join workspace dulu.',
-                    ),
+                ? const Center(
+                    child: Text('Belum ada content. Tambahkan content baru.'),
                   )
                 : ListView.builder(
                     itemCount: appState.contents.length,
@@ -156,6 +170,7 @@ class ContentScreen extends StatelessWidget {
                       final item = appState.contents[index];
                       return ContentCardWidget(
                         item: item,
+                        categoryName: appState.getCategoryName(item.categoryId),
                         onEdit: () => _showContentDialog(context, item: item),
                         onDelete: () => appState.deleteContent(item.id),
                       );
@@ -165,7 +180,7 @@ class ContentScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
-              onPressed: hasWorkspace ? () => _showContentDialog(context) : null,
+              onPressed: () => _showContentDialog(context),
               icon: const Icon(Icons.add),
               label: const Text('Tambah Content'),
             ),

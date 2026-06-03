@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/asset_item.dart';
+import '../models/category_item.dart';
 import '../models/content_item.dart';
 import '../models/user_item.dart';
 import '../models/workspace_item.dart';
@@ -31,6 +32,7 @@ class AppState extends ChangeNotifier {
 
   List<ContentItem> contents = [];
   List<AssetItem> assets = [];
+  List<CategoryItem> categories = [];
   List<WorkspaceItem> workspaces = [];
   List<UserItem> users = [];
 
@@ -52,6 +54,7 @@ class AppState extends ChangeNotifier {
   Future<void> loadAll() async {
     contents = await DBService.fetchContents();
     assets = await DBService.fetchAssets();
+    categories = await DBService.fetchCategories();
     workspaces = await DBService.fetchWorkspaces();
     users = await DBService.fetchUsers();
     notifyListeners();
@@ -142,6 +145,21 @@ class AppState extends ChangeNotifier {
     await loadAll();
   }
 
+  Future<void> createCategory(CategoryItem item) async {
+    await DBService.insertCategory(item);
+    await loadAll();
+  }
+
+  Future<void> updateCategory(CategoryItem item) async {
+    await DBService.updateCategory(item);
+    await loadAll();
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await DBService.deleteCategory(id);
+    await loadAll();
+  }
+
   Future<void> createWorkspace(WorkspaceItem item) async {
     await DBService.insertWorkspace(item);
     workspaceId = item.id;
@@ -207,11 +225,20 @@ class AppState extends ChangeNotifier {
 
   int get totalContent => contents.length;
   int get totalAsset => assets.length;
+  int get totalCategories => categories.length;
   int get totalUsers => users.length;
   int get totalWorkspaces => workspaces.length;
 
   int countContentByStatus(String status) {
     return contents.where((content) => content.status == status).length;
+  }
+
+  String getCategoryName(String categoryId) {
+    final category = categories.firstWhere(
+      (item) => item.id == categoryId,
+      orElse: () => CategoryItem(id: '', name: '-', description: ''),
+    );
+    return category.name.isNotEmpty ? category.name : '-';
   }
 
   WorkspaceItem? get currentWorkspace {

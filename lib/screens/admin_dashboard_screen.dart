@@ -40,34 +40,11 @@ class AdminDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${appState.totalWorkspaces}',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('Total Workspace'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-
-                ],
+                    ],
               ),
               const SizedBox(height: 16),
 
-              // Chart - User & Workspace Distribution
+              // Chart - User Summary
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -75,7 +52,7 @@ class AdminDashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'User & Workspace Summary',
+                        'User Summary',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
@@ -84,7 +61,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         child: BarChart(
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
-                            maxY: [appState.totalUsers.toDouble(), appState.totalWorkspaces.toDouble()].reduce((a, b) => a > b ? a : b) + 2,
+                            maxY: appState.totalUsers.toDouble() + 2,
                             barTouchData: BarTouchData(enabled: false),
                             titlesData: FlTitlesData(
                               show: true,
@@ -94,7 +71,6 @@ class AdminDashboardScreen extends StatelessWidget {
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
                                     if (value.toInt() == 0) return const Text('Users', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold));
-                                    if (value.toInt() == 1) return const Text('Workspace', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold));
                                     return const Text('');
                                   },
                                 ),
@@ -105,7 +81,6 @@ class AdminDashboardScreen extends StatelessWidget {
                                   reservedSize: 30,
                                   getTitlesWidget: (value, meta) {
                                     if (value.toInt() == 0) return Text('${appState.totalUsers}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.deepPurple));
-                                    if (value.toInt() == 1) return Text('${appState.totalWorkspaces}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue));
                                     return const Text('');
                                   },
                                 ),
@@ -122,16 +97,6 @@ class AdminDashboardScreen extends StatelessWidget {
                                   BarChartRodData(
                                     toY: appState.totalUsers.toDouble(),
                                     color: Colors.deepPurple,
-                                    width: 40,
-                                  ),
-                                ],
-                              ),
-                              BarChartGroupData(
-                                x: 1,
-                                barRods: [
-                                  BarChartRodData(
-                                    toY: appState.totalWorkspaces.toDouble(),
-                                    color: Colors.blue,
                                     width: 40,
                                   ),
                                 ],

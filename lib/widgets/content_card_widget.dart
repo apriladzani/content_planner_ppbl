@@ -3,12 +3,14 @@ import '../models/content_item.dart';
 
 class ContentCardWidget extends StatelessWidget {
   final ContentItem item;
+  final String categoryName;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const ContentCardWidget({
     super.key,
     required this.item,
+    required this.categoryName,
     required this.onEdit,
     required this.onDelete,
   });
@@ -66,7 +68,7 @@ class ContentCardWidget extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: ListTile(
           title: Text(item.title),
-          subtitle: Text('${item.type} • ${item.status} • Deadline: ${item.deadline.isNotEmpty ? item.deadline : '-'}'),
+          subtitle: Text('${item.type} • ${item.status} • ${categoryName.isNotEmpty ? categoryName : '-'} • Deadline: ${item.deadline.isNotEmpty ? item.deadline : '-'}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

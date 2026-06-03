@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import '../models/asset_item.dart';
+import '../models/category_item.dart';
 import '../models/content_item.dart';
 import '../models/user_item.dart';
 import '../models/workspace_item.dart';
@@ -12,6 +13,7 @@ class DBService {
   static Database? _database;
   static final StoreRef<String, Map<String, dynamic>> _contentStore = stringMapStoreFactory.store('contents');
   static final StoreRef<String, Map<String, dynamic>> _assetStore = stringMapStoreFactory.store('assets');
+  static final StoreRef<String, Map<String, dynamic>> _categoryStore = stringMapStoreFactory.store('categories');
   static final StoreRef<String, Map<String, dynamic>> _workspaceStore = stringMapStoreFactory.store('workspaces');
   static final StoreRef<String, Map<String, dynamic>> _userStore = stringMapStoreFactory.store('users');
 
@@ -79,6 +81,32 @@ class DBService {
   static Future<void> deleteAsset(String id) async {
     final db = await database;
     await _assetStore.record(id).delete(db);
+  }
+
+  static Future<List<CategoryItem>> fetchCategories() async {
+    final db = await database;
+    final finder = Finder(sortOrders: [SortOrder('name')]);
+    final records = await _categoryStore.find(db, finder: finder);
+    return records.map((snapshot) {
+      final data = Map<String, dynamic>.from(snapshot.value);
+      data['id'] = snapshot.key;
+      return CategoryItem.fromMap(data);
+    }).toList();
+  }
+
+  static Future<void> insertCategory(CategoryItem item) async {
+    final db = await database;
+    await _categoryStore.record(item.id).put(db, item.toMap());
+  }
+
+  static Future<void> updateCategory(CategoryItem item) async {
+    final db = await database;
+    await _categoryStore.record(item.id).update(db, item.toMap());
+  }
+
+  static Future<void> deleteCategory(String id) async {
+    final db = await database;
+    await _categoryStore.record(id).delete(db);
   }
 
   static Future<List<WorkspaceItem>> fetchWorkspaces() async {

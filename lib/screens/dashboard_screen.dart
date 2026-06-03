@@ -31,9 +31,6 @@ class DashboardScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text('Total Content: $totalContent'),
                       Text('Total Asset: $totalAsset'),
-                      Text('Total Workspace: ${appState.totalWorkspaces}'),
-
-
                     ],
                   ),
                 ),

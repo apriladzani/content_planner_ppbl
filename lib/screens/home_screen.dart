@@ -6,7 +6,7 @@ import 'admin_dashboard_screen.dart';
 import 'content_screen.dart';
 import 'profile_screen.dart';
 import 'repository_screen.dart';
-import 'admin_workspace_screen.dart';
+import 'admin_category_screen.dart';
 import 'admin_user_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isAdmin) {
       return const [
         AdminDashboardScreen(),
-        AdminWorkspaceScreen(),
+        AdminCategoryScreen(),
         AdminUserManagementScreen(),
         ProfileScreen(),
       ];
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isAdmin) {
       return const [
         'Admin Dashboard',
-        'Workspace',
+        'Kategori Konten',
         'User Management',
         'Profil',
       ];
@@ -63,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.folder),
-          label: 'Workspace',
+          icon: Icon(Icons.category),
+          label: 'Kategori',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.people),

@@ -5,6 +5,7 @@ class ContentItem {
   final String status;
   final String description;
   final String deadline;
+  final String categoryId;
 
   ContentItem({
     required this.id,
@@ -13,6 +14,7 @@ class ContentItem {
     required this.status,
     required this.description,
     required this.deadline,
+    required this.categoryId,
   });
 
   factory ContentItem.fromMap(Map<String, dynamic> map) {
@@ -23,6 +25,7 @@ class ContentItem {
       status: map['status'] as String,
       description: map['description'] as String,
       deadline: map['deadline'] as String? ?? '',
+      categoryId: map['categoryId'] as String? ?? '',
     );
   }
 
@@ -34,6 +37,7 @@ class ContentItem {
       'status': status,
       'description': description,
       'deadline': deadline,
+      'categoryId': categoryId,
     };
   }
 }

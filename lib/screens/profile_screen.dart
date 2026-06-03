@@ -2,71 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user_item.dart';
-import '../models/workspace_item.dart';
 import '../providers/app_state.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-
-  Future<void> _showWorkspaceDialog(BuildContext context, {WorkspaceItem? item}) async {
-    final nameController = TextEditingController(text: item?.workspaceName ?? '');
-    final descriptionController = TextEditingController(text: item?.description ?? '');
-    final formKey = GlobalKey<FormState>();
-    final appState = Provider.of<AppState>(context, listen: false);
-    final isEdit = item != null;
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(isEdit ? 'Ubah Workspace' : 'Tambah Workspace'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Workspace Name'),
-                    validator: (value) => value == null || value.isEmpty ? 'Isi nama workspace' : null,
-                  ),
-                  TextFormField(
-                    controller: descriptionController,
-                    decoration: const InputDecoration(labelText: 'Description'),
-                    maxLines: 2,
-                    validator: (value) => value == null || value.isEmpty ? 'Isi description' : null,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
-            ElevatedButton(
-              onPressed: () async {
-                if (!formKey.currentState!.validate()) return;
-                final workspace = WorkspaceItem(
-                  id: item?.id ?? const Uuid().v4(),
-                  workspaceName: nameController.text.trim(),
-                  description: descriptionController.text.trim(),
-                );
-                if (isEdit) {
-                  await appState.updateWorkspace(workspace);
-                } else {
-                  await appState.createWorkspace(workspace);
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Simpan'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> _showUserDialog(BuildContext context, {UserItem? item}) async {
     final nameController = TextEditingController(text: item?.name ?? '');
