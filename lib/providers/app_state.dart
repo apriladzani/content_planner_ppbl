@@ -7,7 +7,6 @@ import '../models/asset_item.dart';
 import '../models/category_item.dart';
 import '../models/content_item.dart';
 import '../models/user_item.dart';
-import '../models/workspace_item.dart';
 import '../services/db_service.dart';
 import '../services/pref_service.dart';
 
@@ -27,12 +26,12 @@ class AppState extends ChangeNotifier {
   String role = 'user';
 
   String? userId;
+  String? selectedCategory;
   UserItem? currentUser;
 
   List<ContentItem> contents = [];
   List<AssetItem> assets = [];
   List<CategoryItem> categories = [];
-  List<WorkspaceItem> workspaces = [];
   List<UserItem> users = [];
 
   Future<void> initialize() async {
@@ -42,9 +41,10 @@ class AppState extends ChangeNotifier {
     isLogin = PrefService.isLogin;
     userId = PrefService.userId;
     role = PrefService.role ?? 'user';
+    selectedCategory = PrefService.selectedCategory;
     currentUser = users.where((u) => u.id == userId).isNotEmpty
-        ? users.where((u) => u.id == userId).first
-        : null;
+      ? users.where((u) => u.id == userId).first
+      : null;
     isInitializing = false;
     notifyListeners();
   }
@@ -53,7 +53,6 @@ class AppState extends ChangeNotifier {
     contents = await DBService.fetchContents();
     assets = await DBService.fetchAssets();
     categories = await DBService.fetchCategories();
-    workspaces = await DBService.fetchWorkspaces();
     users = await DBService.fetchUsers();
     notifyListeners();
   }
@@ -108,7 +107,14 @@ class AppState extends ChangeNotifier {
     userId = null;
     role = 'user';
     currentUser = null;
+    selectedCategory = null;
     await PrefService.logout();
+    notifyListeners();
+  }
+
+  Future<void> setSelectedCategory(String? c) async {
+    selectedCategory = c;
+    await PrefService.setSelectedCategory(c);
     notifyListeners();
   }
 
@@ -157,26 +163,6 @@ class AppState extends ChangeNotifier {
     await loadAll();
   }
 
-  Future<void> createWorkspace(WorkspaceItem item) async {
-    await DBService.insertWorkspace(item);
-    await loadAll();
-  }
-
-  Future<void> updateWorkspace(WorkspaceItem item) async {
-    await DBService.updateWorkspace(item);
-    await loadAll();
-  }
-
-  Future<void> deleteWorkspace(String id) async {
-    await DBService.deleteWorkspace(id);
-    await loadAll();
-  }
-
-  Future<bool> joinWorkspace(String id) async {
-    final exists = workspaces.any((workspace) => workspace.id == id);
-    return exists;
-  }
-
   Future<bool> createUser(UserItem item) async {
     final duplicate = users.any(
       (user) => user.email.trim().toLowerCase() == item.email.trim().toLowerCase(),
@@ -210,7 +196,6 @@ class AppState extends ChangeNotifier {
   int get totalAsset => assets.length;
   int get totalCategories => categories.length;
   int get totalUsers => users.length;
-  int get totalWorkspaces => workspaces.length;
 
   int countContentByStatus(String status) {
     return contents.where((content) => content.status == status).length;

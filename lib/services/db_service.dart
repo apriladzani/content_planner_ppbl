@@ -6,7 +6,6 @@ import '../models/asset_item.dart';
 import '../models/category_item.dart';
 import '../models/content_item.dart';
 import '../models/user_item.dart';
-import '../models/workspace_item.dart';
 import 'database_factory.dart';
 
 class DBService {
@@ -107,32 +106,6 @@ class DBService {
   static Future<void> deleteCategory(String id) async {
     final db = await database;
     await _categoryStore.record(id).delete(db);
-  }
-
-  static Future<List<WorkspaceItem>> fetchWorkspaces() async {
-    final db = await database;
-    final finder = Finder(sortOrders: [SortOrder('workspaceName')]);
-    final records = await _workspaceStore.find(db, finder: finder);
-    return records.map((snapshot) {
-      final data = Map<String, dynamic>.from(snapshot.value);
-      data['id'] = snapshot.key;
-      return WorkspaceItem.fromMap(data);
-    }).toList();
-  }
-
-  static Future<void> insertWorkspace(WorkspaceItem item) async {
-    final db = await database;
-    await _workspaceStore.record(item.id).put(db, item.toMap());
-  }
-
-  static Future<void> updateWorkspace(WorkspaceItem item) async {
-    final db = await database;
-    await _workspaceStore.record(item.id).update(db, item.toMap());
-  }
-
-  static Future<void> deleteWorkspace(String id) async {
-    final db = await database;
-    await _workspaceStore.record(id).delete(db);
   }
 
   static Future<List<UserItem>> fetchUsers() async {

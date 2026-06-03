@@ -145,6 +145,23 @@ class AdminCategoryScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
+                            icon: Icon(
+                              appState.selectedCategory == category.id
+                                  ? Icons.check_circle
+                                  : Icons.check_circle_outline,
+                              color: appState.selectedCategory == category.id ? Colors.green : null,
+                            ),
+                            tooltip: appState.selectedCategory == category.id ? 'Kategori terpilih' : 'Pilih kategori',
+                            onPressed: () async {
+                              await appState.setSelectedCategory(category.id);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Kategori "${category.name}" dipilih')),
+                                );
+                              }
+                            },
+                          ),
+                          IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () => _showCategoryDialog(context, item: category),
                           ),
