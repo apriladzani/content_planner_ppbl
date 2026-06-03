@@ -27,7 +27,6 @@ class AppState extends ChangeNotifier {
   String role = 'user';
 
   String? userId;
-  String? workspaceId;
   UserItem? currentUser;
 
   List<ContentItem> contents = [];
@@ -43,7 +42,6 @@ class AppState extends ChangeNotifier {
     isLogin = PrefService.isLogin;
     userId = PrefService.userId;
     role = PrefService.role ?? 'user';
-    workspaceId = PrefService.workspaceId;
     currentUser = users.where((u) => u.id == userId).isNotEmpty
         ? users.where((u) => u.id == userId).first
         : null;
@@ -110,7 +108,6 @@ class AppState extends ChangeNotifier {
     userId = null;
     role = 'user';
     currentUser = null;
-    workspaceId = null;
     await PrefService.logout();
     notifyListeners();
   }
@@ -162,36 +159,22 @@ class AppState extends ChangeNotifier {
 
   Future<void> createWorkspace(WorkspaceItem item) async {
     await DBService.insertWorkspace(item);
-    workspaceId = item.id;
-    await PrefService.setWorkspaceId(item.id);
     await loadAll();
   }
 
   Future<void> updateWorkspace(WorkspaceItem item) async {
     await DBService.updateWorkspace(item);
-    if (workspaceId == item.id) {
-      workspaceId = item.id;
-      await PrefService.setWorkspaceId(item.id);
-    }
     await loadAll();
   }
 
   Future<void> deleteWorkspace(String id) async {
-    if (workspaceId == id) {
-      workspaceId = null;
-      await PrefService.setWorkspaceId(null);
-    }
     await DBService.deleteWorkspace(id);
     await loadAll();
   }
 
   Future<bool> joinWorkspace(String id) async {
     final exists = workspaces.any((workspace) => workspace.id == id);
-    if (!exists) return false;
-    workspaceId = id;
-    await PrefService.setWorkspaceId(id);
-    notifyListeners();
-    return true;
+    return exists;
   }
 
   Future<bool> createUser(UserItem item) async {
@@ -239,12 +222,5 @@ class AppState extends ChangeNotifier {
       orElse: () => CategoryItem(id: '', name: '-', description: ''),
     );
     return category.name.isNotEmpty ? category.name : '-';
-  }
-
-  WorkspaceItem? get currentWorkspace {
-    return workspaces.firstWhere(
-      (workspace) => workspace.id == workspaceId,
-      orElse: () => WorkspaceItem(id: '', workspaceName: '', description: ''),
-    );
   }
 }

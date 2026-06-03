@@ -5,7 +5,7 @@ class PrefService {
   static const String keyIsLogin = 'isLogin';
   static const String keyUserId = 'userId';
   static const String keyRole = 'role';
-  static const String keyWorkspaceId = 'workspaceId';
+  static const String keyCategory = 'category';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -17,7 +17,7 @@ class PrefService {
 
   static String? get role => _prefs.getString(keyRole);
 
-  static String? get workspaceId => _prefs.getString(keyWorkspaceId);
+  static String? get category => _prefs.getString(keyCategory);
 
   static Future<void> saveLogin(String userId, String role) async {
     await _prefs.setBool(keyIsLogin, true);
@@ -25,11 +25,11 @@ class PrefService {
     await _prefs.setString(keyRole, role);
   }
 
-  static Future<void> setWorkspaceId(String? workspaceId) async {
-    if (workspaceId == null) {
-      await _prefs.remove(keyWorkspaceId);
+  static Future<void> setCategory(String? category) async {
+    if (category == null) {
+      await _prefs.remove(keyCategory);
     } else {
-      await _prefs.setString(keyWorkspaceId, workspaceId);
+      await _prefs.setString(keyCategory, category);
     }
   }
 
@@ -37,6 +37,6 @@ class PrefService {
     await _prefs.setBool(keyIsLogin, false);
     await _prefs.remove(keyUserId);
     await _prefs.remove(keyRole);
-    await _prefs.remove(keyWorkspaceId);
+    await _prefs.remove(keyCategory);
   }
 }
